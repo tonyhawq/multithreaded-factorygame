@@ -61,11 +61,7 @@ DX11Win::Window::Window(int w, int h, LPCWSTR name, WindowClass* windowClass) {
 
 void DX11Win::Window::SetupWindow(int w, int h, LPCWSTR name) {
 	// get adjusted window size based on actual client window size
-	RECT windowRect{};
-	windowRect.left = 0;
-	windowRect.right = w;
-	windowRect.top = 0;
-	windowRect.bottom = h;
+	RECT windowRect{ 0, 0, w, h };
 	if (AdjustWindowRect(&windowRect, WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU, FALSE) == 0)
 	{
 		throw DX11Win::WindowException(__LINE__, __FILE__, GetLastError());
@@ -78,7 +74,7 @@ void DX11Win::Window::SetupWindow(int w, int h, LPCWSTR name) {
 		CW_USEDEFAULT,
 		// get width and height from adjusted window
 		windowRect.right - windowRect.left,
-		windowRect.bottom = windowRect.top,
+		windowRect.bottom - windowRect.top,
 		NULL,
 		NULL,
 		this->thisWindowClass->getInstance(),
@@ -140,7 +136,7 @@ LRESULT DX11Win::Window::MSG_Handler(HWND windowHandle, UINT msg, WPARAM wParam,
 			this->CloseWindow();
 			return 0;
 		}
-		return handler->HandleMSG(windowHandle, msg, wParam, lParam);
+		return handler->HandleMSG(windowHandle, msg, wParam, lParam, this->w, this->h);
 	}
 	switch(msg)
 	{
@@ -155,6 +151,10 @@ LRESULT DX11Win::Window::MSG_Handler(HWND windowHandle, UINT msg, WPARAM wParam,
 		break;
 	}
 	return DefWindowProc(windowHandle, msg, wParam, lParam);
+}
+
+void DX11Win::Window::setTitle(std::string title) {
+	SetWindowTextA(this->windowHandle, title.c_str());
 }
 
 handlers::EventHandler* DX11Win::Window::getHandler()

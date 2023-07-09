@@ -9,10 +9,10 @@ handlers::MouseEvent::MouseEvent() {
 	this->delta = 0;
 }
 
-handlers::MouseEvent::MouseEvent(Type type, MouseHandler* parent, int x, int y, int delta) {
+handlers::MouseEvent::MouseEvent(Type type, MouseHandlerData parent, int x, int y, int delta) {
 	this->type = type;
-	this->LMB = parent->LMB;
-	this->RMB = parent->RMB;
+	this->LMB = parent.LMB;
+	this->RMB = parent.RMB;
 	this->x = x;
 	this->y = y;
 	this->delta = delta;
@@ -91,6 +91,8 @@ void handlers::MouseHandler::clearBuff() {
 }
 
 void handlers::MouseHandler::onMousePress(bool LMB, bool RMB, int x, int y) {
+	this->x = x;
+	this->y = y;
 	if (LMB)
 	{
 		this->LMB = true;
@@ -102,17 +104,19 @@ void handlers::MouseHandler::onMousePress(bool LMB, bool RMB, int x, int y) {
 	MouseEvent e;
 	if (LMB)
 	{
-		e = MouseEvent(handlers::MouseEvent::Type::LMB_DOWN, this, x, y, 0);
+		e = MouseEvent(handlers::MouseEvent::Type::LMB_DOWN, { this->LMB, this->RMB }, x, y, 0);
 	}
 	else if (RMB)
 	{
-		e = MouseEvent(handlers::MouseEvent::Type::RMB_DOWN, this, x, y, 0);
+		e = MouseEvent(handlers::MouseEvent::Type::RMB_DOWN, { this->LMB, this->RMB }, x, y, 0);
 	}
 	this->mouseBuff.push(e);
 	this->trimBuffer(32);
 }
 
 void handlers::MouseHandler::onMouseRelease(bool LMB, bool RMB, int x, int y) {
+	this->x = x;
+	this->y = y;
 	if (LMB)
 	{
 		this->LMB = false;
@@ -124,20 +128,46 @@ void handlers::MouseHandler::onMouseRelease(bool LMB, bool RMB, int x, int y) {
 	MouseEvent e;
 	if (LMB)
 	{
-		e = MouseEvent(handlers::MouseEvent::Type::LMB_UP, this, x, y, 0);
+		e = MouseEvent(handlers::MouseEvent::Type::LMB_UP, { this->LMB, this->RMB }, x, y, 0);
 	}
 	else if (RMB)
 	{
-		e = MouseEvent(handlers::MouseEvent::Type::RMB_UP, this, x, y, 0);
+		e = MouseEvent(handlers::MouseEvent::Type::RMB_UP, { this->LMB, this->RMB }, x, y, 0);
 	}
 	this->mouseBuff.push(e);
 	this->trimBuffer(32);
 }
 
 void handlers::MouseHandler::onMouseMove(int x, int y) {
-	MouseEvent e = MouseEvent(handlers::MouseEvent::Type::MOVE, this, x, y, 0);
+	this->x = x;
+	this->y = y;
+	MouseEvent e = MouseEvent(handlers::MouseEvent::Type::MOVE, { this->LMB, this->RMB }, x, y, 0);
 	this->mouseBuff.push(e);
 	this->trimBuffer(32);
+}
+
+void handlers::MouseHandler::onMouseEnter() {
+	this->isInWindow = true;
+	MouseEvent e = MouseEvent(handlers::MouseEvent::Type::ENTER, { this->LMB, this->RMB }, this->x, this->y, 0);
+	this->mouseBuff.push(e);
+	this->trimBuffer(32);
+}
+
+void handlers::MouseHandler::onMouseLeave() {
+	this->isInWindow = false;
+	MouseEvent e = MouseEvent(handlers::MouseEvent::Type::LEAVE, { this->LMB, this->RMB }, this->x, this->y, 0);
+	this->mouseBuff.push(e);
+	this->trimBuffer(32);
+}
+
+handlers::MouseEvent handlers::MouseHandler::read() {
+	MouseEvent e = this->mouseBuff.front();
+	this->mouseBuff.pop();
+	return e;
+}
+
+bool handlers::MouseHandler::empty() {
+	return this->mouseBuff.empty();
 }
 
 handlers::KeyEvent::KeyEvent()
@@ -183,7 +213,7 @@ void handlers::KeyHandler::onChar(unsigned char keyCode) {
 	this->trimBuffer(32);
 }
 
-handlers::KeyEvent handlers::KeyHandler::getKeyInBuffer() {
+handlers::KeyEvent handlers::KeyHandler::read() {
 	KeyEvent e;
 	if (this->keyBuff.empty())
 	{
@@ -192,6 +222,10 @@ handlers::KeyEvent handlers::KeyHandler::getKeyInBuffer() {
 	e = this->keyBuff.front();
 	this->keyBuff.pop();
 	return e;
+}
+
+bool handlers::KeyHandler::empty() {
+	return this->keyBuff.empty();
 }
 
 void handlers::KeyHandler::trimBuffer(unsigned char size) {
@@ -208,7 +242,8 @@ void handlers::KeyHandler::clearBuff() {
 	}
 }
 
-LRESULT handlers::EventHandler::HandleMSG(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam) {
+LRESULT handlers::EventHandler::HandleMSG(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam, int width, int height) {
+	POINTS pt = { 0,0 };
 	switch (msg)
 	{
 	/*  KEYBOARD EVENTS  */
@@ -233,23 +268,49 @@ LRESULT handlers::EventHandler::HandleMSG(HWND windowHandle, UINT msg, WPARAM wP
 		break;
 	/*  MOUSE EVENTS  */
 	case WM_MOUSEMOVE:
-		const POINTS pt = MAKEPOINTS(lParam);
-		this->mouse.onMouseMove(pt.x, pt.y);
+		pt = MAKEPOINTS(lParam);
+		// if inside the window
+		if (pt.x >= 0 && pt.x < width && pt.y >= 0 && pt.y < height)
+		{
+			// log movement
+			this->mouse.onMouseMove(pt.x, pt.y);
+			if (!this->mouse.isInWindow)
+			{
+				// and set it to be in window if not already
+				SetCapture(windowHandle);
+				this->mouse.onMouseEnter();
+			}
+		}
+		else
+		{
+			// otherwise if a button is pressed
+			if (wParam & (MK_LBUTTON | MK_RBUTTON))
+			{
+				// log movement
+				this->mouse.onMouseMove(pt.x, pt.y);
+			}
+			// but if not, log event for leaving
+			else
+			{
+				ReleaseCapture();
+				this->mouse.onMouseLeave();
+			}
+		}
 		break;
 	case WM_LBUTTONDOWN:
-		const POINTS pt = MAKEPOINTS(lParam);
+		pt = MAKEPOINTS(lParam);
 		this->mouse.onMousePress(true, false, pt.x, pt.y);
 		break;
 	case WM_RBUTTONDOWN:
-		const POINTS pt = MAKEPOINTS(lParam);
+		pt = MAKEPOINTS(lParam);
 		this->mouse.onMousePress(true, false, pt.x, pt.y);
 		break;
 	case WM_LBUTTONUP:
-		const POINTS pt = MAKEPOINTS(lParam);
+		pt = MAKEPOINTS(lParam);
 		this->mouse.onMouseRelease(false, true, pt.x, pt.y);
 		break;
 	case WM_RBUTTONUP:
-		const POINTS pt = MAKEPOINTS(lParam);
+		pt = MAKEPOINTS(lParam);
 		this->mouse.onMouseRelease(false, true, pt.x, pt.y);
 		break;
 	}

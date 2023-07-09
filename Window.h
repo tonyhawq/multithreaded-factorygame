@@ -36,6 +36,8 @@ namespace DX11Win {
 		~Window();
 		void CloseWindow();
 
+		void setTitle(std::string title);
+
 		static LRESULT CALLBACK MSG_HandlerSetup(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam);
 		static LRESULT CALLBACK Static_MSG_Handler(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam);
 

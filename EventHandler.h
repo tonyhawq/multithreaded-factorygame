@@ -6,6 +6,12 @@
 #include "Winbrew.h"
 
 namespace handlers {
+	struct MouseHandlerData
+	{
+		bool LMB = false;
+		bool RMB = false;
+	};
+
 	class MouseEvent
 	{
 	public:
@@ -18,11 +24,13 @@ namespace handlers {
 			WHEEL_UP,
 			WHEEL_DOWN,
 			MOVE,
+			ENTER,
+			LEAVE,
 			INVALID
 		};
 
 		MouseEvent();
-		MouseEvent(Type type, MouseHandler* parent, int x, int y, int delta);
+		MouseEvent(Type type, MouseHandlerData parent, int x, int y, int delta);
 
 		Type getType() const;
 		bool isValid() const;
@@ -57,8 +65,18 @@ namespace handlers {
 		void clearBuff();
 		void trimBuffer(unsigned char size);
 
+		void onMouseEnter();
+		void onMouseLeave();
+
 		bool LMB = false;
 		bool RMB = false;
+		int x = 0;
+		int y = 0;
+
+		MouseEvent read();
+		bool empty();
+
+		bool isInWindow = false;
 	private:
 		std::queue<MouseEvent> mouseBuff;
 	};
@@ -97,7 +115,8 @@ namespace handlers {
 		void onChar(unsigned char keyCode);
 		void trimBuffer(unsigned char size);
 
-		KeyEvent getKeyInBuffer();
+		KeyEvent read();
+		bool empty();
 	private:
 		bool doAutorepeat = false;
 		static constexpr unsigned int numberOfKeys = 256u;
@@ -107,10 +126,12 @@ namespace handlers {
 
 	class EventHandler {
 	public:
-		LRESULT HandleMSG(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam);
+		LRESULT HandleMSG(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam, int width, int height);
 		bool keyPressed(unsigned char keyCode) const;
-	private:
+
 		KeyHandler kbd;
 		MouseHandler mouse;
+	private:
+
 	};
 }

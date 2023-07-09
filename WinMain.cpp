@@ -21,9 +21,32 @@ int CALLBACK WinMain(
 			{
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
-				if (window.getHandler()->keyPressed(VK_SPACE))
+				while (!window.getHandler()->mouse.empty())
 				{
-					MessageBox(NULL, L"oh my GOODNESS!", L"ballz", MB_OK);
+					handlers::MouseEvent e = window.getHandler()->mouse.read();
+					std::string t = "";
+					switch (e.getType())
+					{
+					case handlers::MouseEvent::Type::MOVE:
+						t = std::to_string(e.getX()) + ", " + std::to_string(e.getY());
+						window.setTitle(t);
+						break;
+					case handlers::MouseEvent::Type::LMB_DOWN:
+						t = std::to_string(e.getX()) + ", " + std::to_string(e.getY());
+						t += " lmb down";
+						window.setTitle(t);
+						break;
+					case handlers::MouseEvent::Type::RMB_DOWN:
+						t = std::to_string(e.getX()) + ", " + std::to_string(e.getY());
+						t += " rmb down";
+						window.setTitle(t);
+						break;
+					case handlers::MouseEvent::Type::LEAVE:
+						t = std::to_string(e.getX()) + ", " + std::to_string(e.getY());
+						t += " mouse left!";
+						window.setTitle(t);
+						break;
+					}
 				}
 			}
 		}
