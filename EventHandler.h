@@ -6,6 +6,63 @@
 #include "Winbrew.h"
 
 namespace handlers {
+	class MouseEvent
+	{
+	public:
+		enum class Type
+		{
+			LMB_DOWN,
+			LMB_UP,
+			RMB_DOWN,
+			RMB_UP,
+			WHEEL_UP,
+			WHEEL_DOWN,
+			MOVE,
+			INVALID
+		};
+
+		MouseEvent();
+		MouseEvent(Type type, MouseHandler* parent, int x, int y, int delta);
+
+		Type getType() const;
+		bool isValid() const;
+		bool isPressDown() const;
+		bool isPressUp() const;
+		bool isMouseWheel() const;
+		bool isLMBevent() const;
+		bool isRMBevent() const;
+		bool isLMB() const;
+		bool isRMB() const;
+		bool isMove() const;
+		int getX() const;
+		int getY() const;
+		void getPos(int* x, int* y) const;
+	private:
+		Type type;
+		bool LMB;
+		bool RMB;
+		int x;
+		int y;
+		int delta;
+	};
+
+	class MouseHandler
+	{
+		friend class EventHandler;
+	public:
+		void onMousePress(bool LMB, bool RMB, int x, int y);
+		void onMouseRelease(bool LMB, bool RMB, int x, int y);
+		void onMouseMove(int x, int y);
+		void clearState();
+		void clearBuff();
+		void trimBuffer(unsigned char size);
+
+		bool LMB = false;
+		bool RMB = false;
+	private:
+		std::queue<MouseEvent> mouseBuff;
+	};
+
 	class KeyEvent
 	{
 	public:
@@ -36,6 +93,7 @@ namespace handlers {
 		void onKeyReleased(unsigned char keyCode);
 		bool keyPressed(unsigned char keyCode) const;
 		void clearState();
+		void clearBuff();
 		void onChar(unsigned char keyCode);
 		void trimBuffer(unsigned char size);
 
@@ -52,6 +110,7 @@ namespace handlers {
 		LRESULT HandleMSG(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam);
 		bool keyPressed(unsigned char keyCode) const;
 	private:
-		KeyHandler keyHandler;
+		KeyHandler kbd;
+		MouseHandler mouse;
 	};
 }
