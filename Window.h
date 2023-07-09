@@ -36,19 +36,20 @@ namespace DX11Win {
 		~Window();
 		void CloseWindow();
 
-		void destroyWindowClass();
-
 		static LRESULT CALLBACK MSG_HandlerSetup(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam);
 		static LRESULT CALLBACK Static_MSG_Handler(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam);
 
 		LRESULT MSG_Handler(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam);
 
-		EventHandler* getHandler();
+		handlers::EventHandler* getHandler();
+		handlers::EventHandler* setHandler(handlers::EventHandler* handler);
+
+		std::string title;
 	private:
 		void SetupWindow(int w, int h, LPCWSTR name);
 
 		WindowClass* thisWindowClass = NULL;
-		EventHandler* handler = NULL;
+		handlers::EventHandler* handler = NULL;
 
 		int w = 0;
 		int h = 0;

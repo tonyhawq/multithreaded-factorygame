@@ -46,7 +46,7 @@ void DX11Win::WindowClass::stoppedUsing() {
 }
 
 bool DX11Win::WindowClass::noUsers() {
-	return !usedBy;
+	return usedBy == 0;
 }
 
 DX11Win::Window::Window(int w, int h, LPCWSTR name, LPCWSTR windowClassName) {
@@ -60,14 +60,16 @@ DX11Win::Window::Window(int w, int h, LPCWSTR name, WindowClass* windowClass) {
 }
 
 void DX11Win::Window::SetupWindow(int w, int h, LPCWSTR name) {
-	DX11Win::WindowsRegistered++;
 	// get adjusted window size based on actual client window size
 	RECT windowRect{};
 	windowRect.left = 0;
 	windowRect.right = w;
 	windowRect.top = 0;
 	windowRect.bottom = h;
-	AdjustWindowRect(&windowRect, WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU, FALSE);
+	if (AdjustWindowRect(&windowRect, WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU, FALSE) == 0)
+	{
+		throw DX11Win::WindowException(__LINE__, __FILE__, GetLastError());
+	}
 	this->windowHandle = CreateWindow(
 		this->thisWindowClass->getName(),
 		name,
@@ -82,10 +84,15 @@ void DX11Win::Window::SetupWindow(int w, int h, LPCWSTR name) {
 		this->thisWindowClass->getInstance(),
 		this
 	);
+	if (this->windowHandle == NULL)
+	{
+		throw DX11Win::WindowException(__LINE__, __FILE__, GetLastError());
+	}
 	ShowWindow(this->windowHandle, SW_SHOW);
 	this->w = w;
 	this->h = h;
 	this->thisWindowClass->usingThisObj();
+	DX11Win::WindowsRegistered++;
 }
 
 DX11Win::Window::~Window() {
@@ -93,7 +100,7 @@ DX11Win::Window::~Window() {
 	this->thisWindowClass->stoppedUsing();
 	if (this->thisWindowClass->noUsers())
 	{
-		delete this->thisWindowClass;
+		this->thisWindowClass->~WindowClass();
 	}
 	DestroyWindow(this->windowHandle);
 }
@@ -127,6 +134,12 @@ LRESULT CALLBACK DX11Win::Window::Static_MSG_Handler(HWND windowHandle, UINT msg
 LRESULT DX11Win::Window::MSG_Handler(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam) {
 	if (handler)
 	{
+		if (msg == WM_CLOSE)
+		{
+			PostQuitMessage(0);
+			this->CloseWindow();
+			return 0;
+		}
 		return handler->HandleMSG(windowHandle, msg, wParam, lParam);
 	}
 	switch(msg)
@@ -136,17 +149,30 @@ LRESULT DX11Win::Window::MSG_Handler(HWND windowHandle, UINT msg, WPARAM wParam,
 		this->CloseWindow();
 		return 0;
 		break;
+	case WM_KEYDOWN:
+		this->title.push_back((char)wParam);
+		SetWindowTextA(this->windowHandle, this->title.c_str());
+		break;
 	}
 	return DefWindowProc(windowHandle, msg, wParam, lParam);
 }
 
-EventHandler* DX11Win::Window::getHandler()
+handlers::EventHandler* DX11Win::Window::getHandler()
 {
 	return handler;
 }
 
-DX11Win::WindowException::WindowException(int line, const char* file, HRESULT hr) 
-	: except::BaseException(line, file) {}
+handlers::EventHandler* DX11Win::Window::setHandler(handlers::EventHandler* handler) {
+	handlers::EventHandler* old = this->handler;
+	this->handler = handler;
+	return old;
+}
+
+DX11Win::WindowException::WindowException(int line, const char* file, HRESULT hr)
+	: except::BaseException(line, file)
+{
+	hResult = hr;
+}
 
 const char* DX11Win::WindowException::what() const {
 	std::ostringstream stringstream;
@@ -164,12 +190,12 @@ const char* DX11Win::WindowException::getType() const {
 
 std::string DX11Win::WindowException::translateErrorCode(HRESULT hr) {
 	char* messageBuffer = NULL;
-	DWORD msgLength = FormatMessage(
+	DWORD msgLength = FormatMessageA(
 		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 		NULL,
 		hr,
-		0,
-		reinterpret_cast<LPWSTR>(&messageBuffer),
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		reinterpret_cast<LPSTR>(&messageBuffer),
 		0,
 		NULL
 	);
@@ -178,7 +204,7 @@ std::string DX11Win::WindowException::translateErrorCode(HRESULT hr) {
 		return "Something went wrong during formatting";
 	}
 	std::string errorString = messageBuffer;
-	free(messageBuffer);
+	LocalFree(messageBuffer);
 	return errorString;
 }
 
@@ -187,5 +213,5 @@ HRESULT DX11Win::WindowException::getErrorCode() const {
 }
 
 std::string DX11Win::WindowException::getErrorString() const {
-	return written;
+	return this->translateErrorCode(hResult);
 }
