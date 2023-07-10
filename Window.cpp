@@ -101,8 +101,18 @@ DX11Win::Window::~Window() {
 	DestroyWindow(this->windowHandle);
 }
 
-void DX11Win::Window::CloseWindow() {
-	Window::~Window();
+void DX11Win::Window::CloseWindow(int exitcode) {
+	this->exit = true;
+	this->exitcode = exitcode;
+}
+
+void DX11Win::Window::processMessages() {
+	MSG msg{};
+	while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+	{
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
 }
 
 LRESULT CALLBACK DX11Win::Window::MSG_HandlerSetup(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam) {
@@ -128,33 +138,30 @@ LRESULT CALLBACK DX11Win::Window::Static_MSG_Handler(HWND windowHandle, UINT msg
 }
 
 LRESULT DX11Win::Window::MSG_Handler(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam) {
+	if (msg == WM_QUIT)
+	{
+		__debugbreak();
+		this->CloseWindow(0);
+		return DefWindowProc(windowHandle, msg, wParam, lParam);
+	}
 	if (handler)
 	{
-		if (msg == WM_CLOSE)
-		{
-			PostQuitMessage(0);
-			this->CloseWindow();
-			return 0;
-		}
 		return handler->HandleMSG(windowHandle, msg, wParam, lParam, this->w, this->h);
-	}
-	switch(msg)
-	{
-	case WM_CLOSE:
-		PostQuitMessage(0);
-		this->CloseWindow();
-		return 0;
-		break;
-	case WM_KEYDOWN:
-		this->title.push_back((char)wParam);
-		SetWindowTextA(this->windowHandle, this->title.c_str());
-		break;
 	}
 	return DefWindowProc(windowHandle, msg, wParam, lParam);
 }
 
 void DX11Win::Window::setTitle(std::string title) {
 	SetWindowTextA(this->windowHandle, title.c_str());
+}
+
+handlers::EventHandler* DX11Win::Window::getOrMakeHandler()
+{
+	if (!this->handler)
+	{
+		this->handler = new handlers::EventHandler();
+	}
+	return this->handler;
 }
 
 handlers::EventHandler* DX11Win::Window::getHandler()

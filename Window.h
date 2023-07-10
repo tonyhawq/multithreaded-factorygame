@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <optional>
 
 #include "Winbrew.h"
 #include "EventHandler.h"
@@ -34,19 +35,22 @@ namespace DX11Win {
 		Window(int w, int h, LPCWSTR name, LPCWSTR windowClassName);
 		Window(int w, int h, LPCWSTR name, WindowClass* windowClass);
 		~Window();
-		void CloseWindow();
+		void CloseWindow(int exitcode);
 
 		void setTitle(std::string title);
 
+		static void processMessages();
 		static LRESULT CALLBACK MSG_HandlerSetup(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam);
 		static LRESULT CALLBACK Static_MSG_Handler(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam);
-
 		LRESULT MSG_Handler(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam);
-
+		
+		handlers::EventHandler* getOrMakeHandler();
 		handlers::EventHandler* getHandler();
 		handlers::EventHandler* setHandler(handlers::EventHandler* handler);
 
 		std::string title;
+		bool exit = false;
+		int exitcode = 0;
 	private:
 		void SetupWindow(int w, int h, LPCWSTR name);
 

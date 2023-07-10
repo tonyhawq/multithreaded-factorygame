@@ -2,11 +2,13 @@
 #include "Winbrew.h"
 #include <chrono>
 
-namespace time {
-	auto sleep = Sleep;
+namespace gTime {
+	inline auto sleep = Sleep;
 
 	class MarcoPolo {
 	public:
+		MarcoPolo();
+
 		float start() const;
 		float since() const;
 	private:
