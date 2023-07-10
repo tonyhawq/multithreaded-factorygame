@@ -19,6 +19,12 @@
     <Filter Include="Code\timing">
       <UniqueIdentifier>{e2830985-ad4f-4cdb-80c3-e39abca3d6fd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Code\Game\Prototypes">
+      <UniqueIdentifier>{5d27677f-f1d9-4aaa-8245-a6a4e2d6d719}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\DX11">
+      <UniqueIdentifier>{85636e32-d842-491b-ae61-11bb822b8e5f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
@@ -39,6 +45,9 @@
     <ClCompile Include="Timing.cpp">
       <Filter>Code\timing</Filter>
     </ClCompile>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>Code\DX11</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -58,6 +67,9 @@
     </ClInclude>
     <ClInclude Include="Timing.h">
       <Filter>Code\timing</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h">
+      <Filter>Code\DX11</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
