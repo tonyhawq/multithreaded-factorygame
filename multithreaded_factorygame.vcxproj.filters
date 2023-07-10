@@ -16,6 +16,9 @@
     <Filter Include="Code\Game">
       <UniqueIdentifier>{f665c6a8-f9e5-4c65-86ee-9d12b7dd99b0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Code\timing">
+      <UniqueIdentifier>{e2830985-ad4f-4cdb-80c3-e39abca3d6fd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
@@ -33,6 +36,9 @@
     <ClCompile Include="Exceptions.cpp">
       <Filter>Code\ErrorLogging</Filter>
     </ClCompile>
+    <ClCompile Include="Timing.cpp">
+      <Filter>Code\timing</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -49,6 +55,9 @@
     </ClInclude>
     <ClInclude Include="Exceptions.h">
       <Filter>Code\ErrorLogging</Filter>
+    </ClInclude>
+    <ClInclude Include="Timing.h">
+      <Filter>Code\timing</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
