@@ -59,6 +59,10 @@ DX11Win::Window::Window(int w, int h, LPCWSTR name, WindowClass* windowClass) {
 	SetupWindow(w, h, name);
 }
 
+Graphics::DX11GFX::Graphics& DX11Win::Window::getGraphics() {
+	return *gfx;
+}
+
 void DX11Win::Window::SetupWindow(int w, int h, LPCWSTR name) {
 	// get adjusted window size based on actual client window size
 	RECT windowRect{ 0, 0, w, h };
@@ -88,6 +92,7 @@ void DX11Win::Window::SetupWindow(int w, int h, LPCWSTR name) {
 	this->w = w;
 	this->h = h;
 	this->thisWindowClass->usingThisObj();
+	this->gfx = std::make_unique<Graphics::DX11GFX::Graphics>(windowHandle);
 	DX11Win::WindowsRegistered++;
 }
 
@@ -106,13 +111,18 @@ void DX11Win::Window::CloseWindow(int exitcode) {
 	this->exitcode = exitcode;
 }
 
-void DX11Win::Window::processMessages() {
+std::optional<int> DX11Win::Window::processMessages() {
 	MSG msg{};
 	while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 	{
+		if (msg.message == WM_QUIT)
+		{
+			return msg.wParam;
+		}
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
+	return {};
 }
 
 LRESULT CALLBACK DX11Win::Window::MSG_HandlerSetup(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam) {
@@ -138,9 +148,8 @@ LRESULT CALLBACK DX11Win::Window::Static_MSG_Handler(HWND windowHandle, UINT msg
 }
 
 LRESULT DX11Win::Window::MSG_Handler(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam) {
-	if (msg == WM_QUIT)
+	if (msg == WM_CLOSE)
 	{
-		__debugbreak();
 		this->CloseWindow(0);
 		return DefWindowProc(windowHandle, msg, wParam, lParam);
 	}

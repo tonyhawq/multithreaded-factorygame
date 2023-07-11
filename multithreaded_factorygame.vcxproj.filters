@@ -22,7 +22,10 @@
     <Filter Include="Code\Game\Prototypes">
       <UniqueIdentifier>{5d27677f-f1d9-4aaa-8245-a6a4e2d6d719}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Code\DX11">
+    <Filter Include="Code\Graphics">
+      <UniqueIdentifier>{e16bcb7e-79cf-494a-9124-29818cb3b9d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Graphics\DX11">
       <UniqueIdentifier>{85636e32-d842-491b-ae61-11bb822b8e5f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -45,8 +48,11 @@
     <ClCompile Include="Timing.cpp">
       <Filter>Code\timing</Filter>
     </ClCompile>
+    <ClCompile Include="Graphics.cpp">
+      <Filter>Code\Graphics\DX11</Filter>
+    </ClCompile>
     <ClCompile Include="Renderer.cpp">
-      <Filter>Code\DX11</Filter>
+      <Filter>Code\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -68,8 +74,14 @@
     <ClInclude Include="Timing.h">
       <Filter>Code\timing</Filter>
     </ClInclude>
+    <ClInclude Include="Graphics.h">
+      <Filter>Code\Graphics\DX11</Filter>
+    </ClInclude>
+    <ClInclude Include="DX11GFX_Namespace.h">
+      <Filter>Code\Graphics\DX11</Filter>
+    </ClInclude>
     <ClInclude Include="Renderer.h">
-      <Filter>Code\DX11</Filter>
+      <Filter>Code\Graphics</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

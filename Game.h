@@ -2,6 +2,8 @@
 
 #include "Window.h"
 #include "Timing.h"
+#include "Renderer.h"
+#include <sstream>
 
 /// <summary>
 /// Highest level class
@@ -20,6 +22,7 @@ public:
 	void update();
 	void render();
 
+	Graphics::Renderer renderer = Graphics::Renderer();
 	DX11Win::Window* window = NULL;
 	gTime::MarcoPolo timer;
 private:

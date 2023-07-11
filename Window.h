@@ -1,11 +1,12 @@
 #pragma once
 
-#include <vector>
+#include <memory>
 #include <optional>
 
 #include "Winbrew.h"
 #include "EventHandler.h"
 #include "Exceptions.h"
+#include "Graphics.h"
 
 namespace DX11Win {
 	extern unsigned int WindowsRegistered;
@@ -39,7 +40,7 @@ namespace DX11Win {
 
 		void setTitle(std::string title);
 
-		static void processMessages();
+		static std::optional<int> processMessages();
 		static LRESULT CALLBACK MSG_HandlerSetup(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam);
 		static LRESULT CALLBACK Static_MSG_Handler(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam);
 		LRESULT MSG_Handler(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -51,11 +52,14 @@ namespace DX11Win {
 		std::string title;
 		bool exit = false;
 		int exitcode = 0;
+
+		Graphics::DX11GFX::Graphics& getGraphics();
 	private:
 		void SetupWindow(int w, int h, LPCWSTR name);
 
 		WindowClass* thisWindowClass = NULL;
 		handlers::EventHandler* handler = NULL;
+		std::unique_ptr<Graphics::DX11GFX::Graphics> gfx;
 
 		int w = 0;
 		int h = 0;
