@@ -54,6 +54,9 @@
     <ClCompile Include="Renderer.cpp">
       <Filter>Code\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="WindowsException.cpp">
+      <Filter>Code\ErrorLogging</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -82,6 +85,9 @@
     </ClInclude>
     <ClInclude Include="Renderer.h">
       <Filter>Code\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowsException.h">
+      <Filter>Code\ErrorLogging</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,16 +1,18 @@
 #include "Game.h"
 
 Game::Game(int w, int h, LPCWSTR name) {
-	window = new DX11Win::Window(w, h, name, L"DX11 factorygame windowclass");
-	Graphics::DX11GFX::Graphics gfx = window->getGraphics();
-	renderer.setContext(gfx.getContext());
-	renderer.setTarget(gfx.getRenderTarget());
+	this->handler = new handlers::EventHandler();
+	this->window = new DX11Win::Window(w, h, name, L"DX11 factorygame windowclass", this->handler);
+	Graphics::DX11GFX::Graphics* gfx = this->window->getGraphics();
+	this->renderer.setContext(gfx->getContext());
+	this->renderer.setTarget(gfx->getRenderTarget());
+	this->renderer.setSwapChain(gfx->getSwapchain());
+	this->renderer.setDevice(gfx->getDevice());
 }
 
-void Game::destroyWindow(DX11Win::Window* win) {
-	win->~Window();
-	delete win;
-	win = NULL;
+void Game::destroyWindow(DX11Win::Window** win) {
+	delete (*win);
+	(*win) = NULL;
 }
 
 int Game::run() {
@@ -30,7 +32,8 @@ int Game::run() {
 		if (this->window->exit)
 		{
 			exitcode = this->window->exitcode;
-			this->destroyWindow(this->window);
+			this->destroyWindow(&(this->window));
+			continue;
 		}
 		gTime::sleep(16);
 		update();
@@ -51,8 +54,8 @@ void Game::update() {
 	std::ostringstream stringstream;
 	stringstream << "time elapsed " << t;
 	window->setTitle(stringstream.str());
-	const float r = sin(t);
-	const float g = sin(t + 1.57);
+	const float r = (float)handler->mouse.x / (float)window->getW();
+	const float g = (float)handler->mouse.y / (float)window->getH();
 	const float b = sin(t + 3.14);
 	renderer.clearTarget(r, g, b);
 	renderer.flip();

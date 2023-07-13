@@ -26,6 +26,7 @@
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Timing.cpp" />
     <ClCompile Include="Window.cpp" />
+    <ClCompile Include="WindowsException.cpp" />
     <ClCompile Include="WinMain.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -38,6 +39,7 @@
     <ClInclude Include="Timing.h" />
     <ClInclude Include="Winbrew.h" />
     <ClInclude Include="Window.h" />
+    <ClInclude Include="WindowsException.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

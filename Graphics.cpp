@@ -46,23 +46,6 @@ Graphics::DX11GFX::Graphics::Graphics(HWND windowHandle, D3D_DRIVER_TYPE drivert
 	}
 	device->CreateRenderTargetView(backBuffer, NULL, &this->target);
 	backBuffer->Release();
-	char* messageBuffer = NULL;
-	DWORD msgLength = FormatMessageA(
-		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-		NULL,
-		res,
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-		reinterpret_cast<LPSTR>(&messageBuffer),
-		0,
-		NULL
-	);
-	if (msgLength == 0)
-	{
-		return;
-	}
-	std::string errorString = messageBuffer;
-	LocalFree(messageBuffer);
-	MessageBoxA(windowHandle, errorString.c_str(), errorString.c_str(), MB_ICONEXCLAMATION);
 }
 
 Graphics::DX11GFX::Graphics::~Graphics() {

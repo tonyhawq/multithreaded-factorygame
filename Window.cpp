@@ -49,22 +49,23 @@ bool DX11Win::WindowClass::noUsers() {
 	return usedBy == 0;
 }
 
-DX11Win::Window::Window(int w, int h, LPCWSTR name, LPCWSTR windowClassName) {
+DX11Win::Window::Window(int w, int h, LPCWSTR name, LPCWSTR windowClassName, handlers::EventHandler* handler) {
 	this->thisWindowClass = new WindowClass(windowClassName);
-	SetupWindow(w, h, name);
+	SetupWindow(w, h, name, handler);
 }
 
-DX11Win::Window::Window(int w, int h, LPCWSTR name, WindowClass* windowClass) {
+DX11Win::Window::Window(int w, int h, LPCWSTR name, WindowClass* windowClass, handlers::EventHandler* handler) {
 	this->thisWindowClass = windowClass;
-	SetupWindow(w, h, name);
+	SetupWindow(w, h, name, handler);
 }
 
-Graphics::DX11GFX::Graphics& DX11Win::Window::getGraphics() {
-	return *gfx;
+Graphics::DX11GFX::Graphics*& DX11Win::Window::getGraphics() {
+	return gfx;
 }
 
-void DX11Win::Window::SetupWindow(int w, int h, LPCWSTR name) {
+void DX11Win::Window::SetupWindow(int w, int h, LPCWSTR name, handlers::EventHandler* handler) {
 	// get adjusted window size based on actual client window size
+	this->handler = handler;
 	RECT windowRect{ 0, 0, w, h };
 	if (AdjustWindowRect(&windowRect, WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU, FALSE) == 0)
 	{
@@ -92,7 +93,7 @@ void DX11Win::Window::SetupWindow(int w, int h, LPCWSTR name) {
 	this->w = w;
 	this->h = h;
 	this->thisWindowClass->usingThisObj();
-	this->gfx = std::make_unique<Graphics::DX11GFX::Graphics>(windowHandle);
+	this->gfx = new Graphics::DX11GFX::Graphics(windowHandle);
 	DX11Win::WindowsRegistered++;
 }
 
@@ -102,6 +103,11 @@ DX11Win::Window::~Window() {
 	if (this->thisWindowClass->noUsers())
 	{
 		this->thisWindowClass->~WindowClass();
+	}
+	if (this->gfx)
+	{
+		delete this->gfx;
+		this->gfx = NULL;
 	}
 	DestroyWindow(this->windowHandle);
 }
@@ -164,24 +170,13 @@ void DX11Win::Window::setTitle(std::string title) {
 	SetWindowTextA(this->windowHandle, title.c_str());
 }
 
-handlers::EventHandler* DX11Win::Window::getOrMakeHandler()
-{
-	if (!this->handler)
-	{
-		this->handler = new handlers::EventHandler();
-	}
-	return this->handler;
+HWND* DX11Win::Window::getHandle() {
+	return &(this->windowHandle);
 }
 
 handlers::EventHandler* DX11Win::Window::getHandler()
 {
 	return handler;
-}
-
-handlers::EventHandler* DX11Win::Window::setHandler(handlers::EventHandler* handler) {
-	handlers::EventHandler* old = this->handler;
-	this->handler = handler;
-	return old;
 }
 
 DX11Win::WindowException::WindowException(int line, const char* file, HRESULT hr)

@@ -13,7 +13,7 @@ class Game
 public:
 	Game(int w, int h, LPCWSTR name);
 
-	void destroyWindow(DX11Win::Window* win);
+	void destroyWindow(DX11Win::Window** win);
 
 	int run();
 	bool isRunning();
@@ -25,6 +25,7 @@ public:
 	Graphics::Renderer renderer = Graphics::Renderer();
 	DX11Win::Window* window = NULL;
 	gTime::MarcoPolo timer;
+	handlers::EventHandler* handler = NULL;
 private:
 	bool running = false;
 };

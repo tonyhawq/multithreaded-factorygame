@@ -33,8 +33,8 @@ namespace DX11Win {
 	class Window
 	{
 	public:
-		Window(int w, int h, LPCWSTR name, LPCWSTR windowClassName);
-		Window(int w, int h, LPCWSTR name, WindowClass* windowClass);
+		Window(int w, int h, LPCWSTR name, LPCWSTR windowClassName, handlers::EventHandler* handler);
+		Window(int w, int h, LPCWSTR name, WindowClass* windowClass, handlers::EventHandler* handler);
 		~Window();
 		void CloseWindow(int exitcode);
 
@@ -45,21 +45,25 @@ namespace DX11Win {
 		static LRESULT CALLBACK Static_MSG_Handler(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam);
 		LRESULT MSG_Handler(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam);
 		
-		handlers::EventHandler* getOrMakeHandler();
 		handlers::EventHandler* getHandler();
-		handlers::EventHandler* setHandler(handlers::EventHandler* handler);
 
 		std::string title;
 		bool exit = false;
 		int exitcode = 0;
 
-		Graphics::DX11GFX::Graphics& getGraphics();
+		HWND* getHandle();
+
+		Graphics::DX11GFX::Graphics*& getGraphics();
+
+		int getW() { return this->w; }
+		int getH() { return this->h; }
+		void getSize(int* w, int* h) { if (w) { *w = this->w; } if (h) { *h = this->h; } }
 	private:
-		void SetupWindow(int w, int h, LPCWSTR name);
+		void SetupWindow(int w, int h, LPCWSTR name, handlers::EventHandler* handler);
 
 		WindowClass* thisWindowClass = NULL;
 		handlers::EventHandler* handler = NULL;
-		std::unique_ptr<Graphics::DX11GFX::Graphics> gfx;
+		Graphics::DX11GFX::Graphics* gfx;
 
 		int w = 0;
 		int h = 0;
