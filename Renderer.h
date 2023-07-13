@@ -4,6 +4,8 @@
 #include <d3d11.h>
 
 #include "DX11GFX_Namespace.h"
+#include "WindowsException.h"
+#include "Graphics.h"
 
 class Graphics::Renderer
 {

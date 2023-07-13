@@ -35,16 +35,21 @@ Graphics::DX11GFX::Graphics::Graphics(HWND windowHandle, D3D_DRIVER_TYPE drivert
 		NULL,
 		&context
 	);
-
-	ID3D11Resource* backBuffer = NULL;
-	swapchain->GetBuffer(0, __uuidof(ID3D11Resource), (void**)&backBuffer);
-	if (!backBuffer)
+	if (FAILED(res))
 	{
-		//TODO: make real exception
-		throw new std::exception("BACKBUFFER NULL");
-		return;
+		throw new except::WindowException(__LINE__, __FILE__, res);
 	}
-	device->CreateRenderTargetView(backBuffer, NULL, &this->target);
+	ID3D11Resource* backBuffer = NULL;
+	res = swapchain->GetBuffer(0, __uuidof(ID3D11Resource), (void**)&backBuffer);
+	if (FAILED(res))
+	{
+		throw new except::WindowException(__LINE__, __FILE__, res);
+	}
+	res = device->CreateRenderTargetView(backBuffer, NULL, &this->target);
+	if (FAILED(res))
+	{
+		throw new except::WindowException(__LINE__, __FILE__, res);
+	}
 	backBuffer->Release();
 }
 
@@ -72,3 +77,8 @@ ID3D11Device* Graphics::DX11GFX::Graphics::getDevice() { return this->device; }
 IDXGISwapChain* Graphics::DX11GFX::Graphics::getSwapchain() { return this->swapchain; }
 ID3D11DeviceContext* Graphics::DX11GFX::Graphics::getContext() { return this->context; }
 ID3D11RenderTargetView* Graphics::DX11GFX::Graphics::getRenderTarget() { return this->target; }
+
+const char* Graphics::DX11GFX::DeviceRemovedException::getType() const
+{
+	return "Device removed exception";
+}

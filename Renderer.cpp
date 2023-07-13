@@ -17,5 +17,16 @@ void Graphics::Renderer::setSwapChain(IDXGISwapChain* swapcchain) {
 }
 
 void Graphics::Renderer::flip() {
-	this->swapchain->Present(0, DXGI_PRESENT_DO_NOT_WAIT);
+	HRESULT res = this->swapchain->Present(0, DXGI_PRESENT_DO_NOT_WAIT);
+	if (FAILED(res))
+	{
+		if (res == DXGI_ERROR_DEVICE_REMOVED)
+		{
+			throw new Graphics::DX11GFX::DeviceRemovedException(__LINE__, __FILE__, this->device->GetDeviceRemovedReason());
+		}
+		else
+		{
+			throw new except::WindowException(__LINE__, __FILE__, res);
+		}
+	}
 }

@@ -69,7 +69,7 @@ void DX11Win::Window::SetupWindow(int w, int h, LPCWSTR name, handlers::EventHan
 	RECT windowRect{ 0, 0, w, h };
 	if (AdjustWindowRect(&windowRect, WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU, FALSE) == 0)
 	{
-		throw DX11Win::WindowException(__LINE__, __FILE__, GetLastError());
+		throw except::WindowException(__LINE__, __FILE__, GetLastError());
 	}
 	this->windowHandle = CreateWindow(
 		this->thisWindowClass->getName(),
@@ -87,7 +87,7 @@ void DX11Win::Window::SetupWindow(int w, int h, LPCWSTR name, handlers::EventHan
 	);
 	if (this->windowHandle == NULL)
 	{
-		throw DX11Win::WindowException(__LINE__, __FILE__, GetLastError());
+		throw except::WindowException(__LINE__, __FILE__, GetLastError());
 	}
 	ShowWindow(this->windowHandle, SW_SHOW);
 	this->w = w;
@@ -177,52 +177,4 @@ HWND* DX11Win::Window::getHandle() {
 handlers::EventHandler* DX11Win::Window::getHandler()
 {
 	return handler;
-}
-
-DX11Win::WindowException::WindowException(int line, const char* file, HRESULT hr)
-	: except::BaseException(line, file)
-{
-	hResult = hr;
-}
-
-const char* DX11Win::WindowException::what() const {
-	std::ostringstream stringstream;
-	stringstream << this->getType() << '\n'
-		<< "Error code: " << this->getErrorCode() << '\n'
-		<< "Error Desc: " << this->getErrorString() << '\n'
-		<< getOrigin();
-	written = stringstream.str();
-	return written.c_str();
-}
-
-const char* DX11Win::WindowException::getType() const {
-	return "Window Exception";
-}
-
-std::string DX11Win::WindowException::translateErrorCode(HRESULT hr) {
-	char* messageBuffer = NULL;
-	DWORD msgLength = FormatMessageA(
-		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-		NULL,
-		hr,
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-		reinterpret_cast<LPSTR>(&messageBuffer),
-		0,
-		NULL
-	);
-	if (msgLength == 0)
-	{
-		return "Something went wrong during formatting";
-	}
-	std::string errorString = messageBuffer;
-	LocalFree(messageBuffer);
-	return errorString;
-}
-
-HRESULT DX11Win::WindowException::getErrorCode() const {
-	return hResult;
-}
-
-std::string DX11Win::WindowException::getErrorString() const {
-	return this->translateErrorCode(hResult);
 }

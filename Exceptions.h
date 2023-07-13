@@ -19,4 +19,6 @@ namespace except {
 	protected:
 		mutable std::string written;
 	};
+
+	class WindowException;
 }

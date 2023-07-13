@@ -6,6 +6,7 @@
 #include "Winbrew.h"
 #include "EventHandler.h"
 #include "Exceptions.h"
+#include "WindowsException.h"
 #include "Graphics.h"
 
 namespace DX11Win {
@@ -68,18 +69,5 @@ namespace DX11Win {
 		int w = 0;
 		int h = 0;
 		HWND windowHandle{};
-	};
-
-	class WindowException : public except::BaseException
-	{
-	public:
-		WindowException(int line, const char* file, HRESULT hr);
-		const char* what() const override;
-		const char* getType() const override;
-		static std::string translateErrorCode(HRESULT hr);
-		HRESULT getErrorCode() const;
-		std::string getErrorString() const;
-	private:
-		HRESULT hResult;
 	};
 }

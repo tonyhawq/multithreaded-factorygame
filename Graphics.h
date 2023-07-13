@@ -3,6 +3,7 @@
 
 #include "Winbrew.h"
 #include <d3d11.h>
+#include "WindowsException.h"
 
 class Graphics::DX11GFX::Graphics
 {
@@ -21,3 +22,8 @@ private:
 	ID3D11RenderTargetView* target = NULL;
 };
 
+class Graphics::DX11GFX::DeviceRemovedException : public except::WindowException {
+	using except::WindowException::WindowException;
+public:
+	const char* getType() const override;
+};
