@@ -39,13 +39,13 @@ Graphics::DX11GFX::Graphics::Graphics(HWND windowHandle, D3D_DRIVER_TYPE drivert
 	{
 		throw new except::WindowException(__LINE__, __FILE__, res);
 	}
-	ID3D11Resource* backBuffer = NULL;
-	res = swapchain->GetBuffer(0, __uuidof(ID3D11Resource), (void**)&backBuffer);
+	Microsoft::WRL::ComPtr<ID3D11Resource> backBuffer = NULL;
+	res = this->swapchain->GetBuffer(0, __uuidof(ID3D11Resource), &backBuffer);
 	if (FAILED(res))
 	{
 		throw new except::WindowException(__LINE__, __FILE__, res);
 	}
-	res = device->CreateRenderTargetView(backBuffer, NULL, &this->target);
+	res = device->CreateRenderTargetView(backBuffer.Get(), NULL, &this->target);
 	if (FAILED(res))
 	{
 		throw new except::WindowException(__LINE__, __FILE__, res);
@@ -53,30 +53,13 @@ Graphics::DX11GFX::Graphics::Graphics(HWND windowHandle, D3D_DRIVER_TYPE drivert
 	backBuffer->Release();
 }
 
-Graphics::DX11GFX::Graphics::~Graphics() {
-	if (target)
-	{
-		target->Release();
-	}
-	if (context)
-	{
-		context->Release();
-	}
-	if (swapchain)
-	{
-		swapchain->Release();
-	}
-	if (device)
-	{
-		device->Release();
-	}
-}
+Graphics::DX11GFX::Graphics::~Graphics() {}
 
 
-ID3D11Device* Graphics::DX11GFX::Graphics::getDevice() { return this->device; }
-IDXGISwapChain* Graphics::DX11GFX::Graphics::getSwapchain() { return this->swapchain; }
-ID3D11DeviceContext* Graphics::DX11GFX::Graphics::getContext() { return this->context; }
-ID3D11RenderTargetView* Graphics::DX11GFX::Graphics::getRenderTarget() { return this->target; }
+ID3D11Device* Graphics::DX11GFX::Graphics::getDevice() { return this->device.Get(); }
+IDXGISwapChain*& Graphics::DX11GFX::Graphics::getSwapchain() { return this->swapchain.Get(); }
+ID3D11DeviceContext* Graphics::DX11GFX::Graphics::getContext() { return this->context.Get(); }
+ID3D11RenderTargetView* Graphics::DX11GFX::Graphics::getRenderTarget() { return this->target.Get(); }
 
 const char* Graphics::DX11GFX::DeviceRemovedException::getType() const
 {

@@ -3,6 +3,8 @@
 
 #include "Winbrew.h"
 #include <d3d11.h>
+#include <wrl.h>
+
 #include "WindowsException.h"
 
 class Graphics::DX11GFX::Graphics
@@ -16,10 +18,10 @@ public:
 	ID3D11DeviceContext* getContext();
 	ID3D11RenderTargetView* getRenderTarget();
 private:
-	ID3D11Device* device = NULL;
-	IDXGISwapChain* swapchain = NULL;
-	ID3D11DeviceContext* context = NULL;
-	ID3D11RenderTargetView* target = NULL;
+	Microsoft::WRL::ComPtr<ID3D11Device> device;
+	Microsoft::WRL::ComPtr<IDXGISwapChain> swapchain;
+	Microsoft::WRL::ComPtr<ID3D11DeviceContext> context;
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> target;
 };
 
 class Graphics::DX11GFX::DeviceRemovedException : public except::WindowException {
