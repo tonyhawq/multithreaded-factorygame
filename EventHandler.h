@@ -2,6 +2,7 @@
 
 #include <bitset>
 #include <queue>
+#include <sstream>
 
 #include "Winbrew.h"
 

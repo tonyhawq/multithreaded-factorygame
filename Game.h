@@ -12,6 +12,7 @@ class Game
 {
 public:
 	Game(int w, int h, LPCWSTR name);
+	~Game();
 
 	void destroyWindow(DX11Win::Window** win);
 

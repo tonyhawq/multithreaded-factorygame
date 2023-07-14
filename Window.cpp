@@ -49,12 +49,12 @@ bool DX11Win::WindowClass::noUsers() {
 	return usedBy == 0;
 }
 
-DX11Win::Window::Window(int w, int h, LPCWSTR name, LPCWSTR windowClassName, handlers::EventHandler* handler) {
+DX11Win::Window::Window(int w, int h, LPCWSTR name, LPCWSTR windowClassName, handlers::EventHandler*& handler) {
 	this->thisWindowClass = new WindowClass(windowClassName);
 	SetupWindow(w, h, name, handler);
 }
 
-DX11Win::Window::Window(int w, int h, LPCWSTR name, WindowClass* windowClass, handlers::EventHandler* handler) {
+DX11Win::Window::Window(int w, int h, LPCWSTR name, WindowClass* windowClass, handlers::EventHandler*& handler) {
 	this->thisWindowClass = windowClass;
 	SetupWindow(w, h, name, handler);
 }
@@ -150,6 +150,11 @@ LRESULT CALLBACK DX11Win::Window::MSG_HandlerSetup(HWND windowHandle, UINT msg, 
 
 LRESULT CALLBACK DX11Win::Window::Static_MSG_Handler(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam) {
 	Window* windowToUse = reinterpret_cast<Window*>(GetWindowLongPtr(windowHandle, GWLP_USERDATA));
+	// fixes broken SHIT fuck this so muchnn
+	if (windowToUse->exit)
+	{
+		return DefWindowProc(windowHandle, msg, wParam, lParam);
+	}
 	return windowToUse->MSG_Handler(windowHandle, msg, wParam, lParam);
 }
 

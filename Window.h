@@ -34,8 +34,8 @@ namespace DX11Win {
 	class Window
 	{
 	public:
-		Window(int w, int h, LPCWSTR name, LPCWSTR windowClassName, handlers::EventHandler* handler);
-		Window(int w, int h, LPCWSTR name, WindowClass* windowClass, handlers::EventHandler* handler);
+		Window(int w, int h, LPCWSTR name, LPCWSTR windowClassName, handlers::EventHandler*& handler);
+		Window(int w, int h, LPCWSTR name, WindowClass* windowClass, handlers::EventHandler*& handler);
 		~Window();
 		void CloseWindow(int exitcode);
 

@@ -10,6 +10,13 @@ Game::Game(int w, int h, LPCWSTR name) {
 	this->renderer.setDevice(gfx->getDevice());
 }
 
+Game::~Game()
+{
+	this->destroyWindow(&(this->window));
+	delete this->handler;
+	this->handler = NULL;
+}
+
 void Game::destroyWindow(DX11Win::Window** win) {
 	delete (*win);
 	(*win) = NULL;
